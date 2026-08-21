@@ -1,0 +1,29 @@
+server:
+  port: 49820
+  read_timeout: 30s
+  write_timeout: 30s
+  shutdown_timeout: 15s
+storage:
+  data_dir: ./data
+  shard_max_size: 1048576
+  sync_on_write: true
+scheduler:
+  escalation_interval: 30s
+  reconciliation_interval: 5m
+  reeval_interval: 1m
+  max_retries: 3
+  base_backoff: 1s
+  task_timeout: 10s
+logging:
+  level: info
+  format: json
+business:
+  default_deadline: 72h
+  escalation_deadline_extension: 48h
+  max_escalation_level: 3
+auth:
+  store_path: ./data/auth.json
+  session_ttl: 8h
+  required: true
+  # On first startup, set SHENZHEN_LIGHT_GOVERNANCE_AUTH_BOOTSTRAP_USERS to a JSON array of
+  # accounts. Passwords are hashed with bcrypt and are not stored in YAML.
