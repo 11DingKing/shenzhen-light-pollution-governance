@@ -140,7 +140,9 @@ func TestCandidateRetryDoesNotDuplicatePlan(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := service.RetryPlanPublication(context.Background(), plan, "retry-10")
+	secondRequest := plan
+	secondRequest.ID = "plan-10-duplicate"
+	second, err := service.RetryPlanPublication(context.Background(), secondRequest, "retry-10")
 	if err != nil || second.ID != first.ID || second.Version != first.Version {
 		t.Fatalf("retry duplicated work: %#v %#v %v", first, second, err)
 	}
