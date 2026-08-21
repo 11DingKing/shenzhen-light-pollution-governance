@@ -433,9 +433,12 @@ func TestLightGovernancePanelMapIsolation(t *testing.T) {
 	_ = service
 }
 
-func TestLightGovernancePendingToApprovedFlow(t *testing.T) {
+func TestLightGovernancePendingToAcceptedFlow(t *testing.T) {
 	service, registry := newLightTestService()
 	reserveReady(t, service, registry, "app-approve")
+	if _, err := service.AcceptComplaint(context.Background(), "app-approve", "reviewer"); !errors.Is(err, ErrLightZoneNotFound) {
+		t.Fatalf("complaint without a lighting zone was accepted: %v", err)
+	}
 	if err := registry.AddZone(context.Background(), LightingZone{ID: "zone-approve", DistrictID: "district-a", VenueKind: "FOOTBALL_FIELD", FixtureCapacity: 20, Active: true}); err != nil {
 		t.Fatal(err)
 	}
@@ -447,13 +450,19 @@ func TestLightGovernancePendingToApprovedFlow(t *testing.T) {
 		t.Fatal(err)
 	}
 	if updated.Status != ComplaintAccepted {
-		t.Fatalf("complaint did not approve: %#v", updated)
+		t.Fatalf("complaint did not enter accepted state: %#v", updated)
 	}
 }
 
 func TestLightGovernanceClosedStateTerminal(t *testing.T) {
 	service, registry := newLightTestService()
 	reserveReady(t, service, registry, "app-terminal")
+	if err := registry.AddZone(context.Background(), LightingZone{ID: "zone-terminal", DistrictID: "district-a", VenueKind: "FOOTBALL_FIELD", FixtureCapacity: 20, Active: true}); err != nil {
+		t.Fatal(err)
+	}
+	if err := service.AssignZone(context.Background(), "app-terminal", "zone-terminal", 10); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := service.AcceptComplaint(context.Background(), "app-terminal", "reviewer"); err != nil {
 		t.Fatal(err)
 	}

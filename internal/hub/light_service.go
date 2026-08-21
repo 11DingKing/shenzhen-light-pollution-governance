@@ -135,11 +135,12 @@ func (s *LightGovernanceService) AcceptComplaint(ctx context.Context, complaintI
 	if _, ok := s.registry.assessments[complaintID]; !ok {
 		return SpillLightComplaint{}, fmt.Errorf("%w: assessment is not reserved", ErrLightCapacity)
 	}
-	if complaint.LightingZoneID != "" {
-		zone, exists := s.registry.zones[complaint.LightingZoneID]
-		if !exists || !zone.Active {
-			return SpillLightComplaint{}, fmt.Errorf("%w: zone unavailable", ErrLightZoneNotFound)
-		}
+	if complaint.LightingZoneID == "" {
+		return SpillLightComplaint{}, fmt.Errorf("%w: lighting zone is required", ErrLightZoneNotFound)
+	}
+	zone, exists := s.registry.zones[complaint.LightingZoneID]
+	if !exists || !zone.Active {
+		return SpillLightComplaint{}, fmt.Errorf("%w: zone unavailable", ErrLightZoneNotFound)
 	}
 	complaint.Status, complaint.UpdatedAt, complaint.Version = ComplaintAccepted, now, complaint.Version+1
 	s.registry.complaints[complaintID] = complaint
